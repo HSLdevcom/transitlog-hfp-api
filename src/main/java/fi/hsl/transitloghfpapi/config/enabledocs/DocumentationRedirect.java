@@ -4,7 +4,7 @@ import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-public class DocumentationRedirectController {
+public class DocumentationRedirect {
 
     @RequestMapping("/")
     public String greetingRedirect() {
