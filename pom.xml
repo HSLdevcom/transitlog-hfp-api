@@ -76,13 +76,22 @@
                             <name>hsl/hfp-api</name>
                         </image>
                     </images>
+                    <registry>
+                        transitlogregistry.azurecr.io
+                    </registry>
+                    <authConfig>
+                        <username>${env.DOCKER_REGISTRY_USERNAME}</username>
+                        <password>${env.DOCKER_REGISTRY_PASSWORD}</password>
+                    </authConfig>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>build-and-push-image</id>
                         <goals>
                             <goal>
                                 build
                             </goal>
+                            <goal>push</goal>
                         </goals>
                         <phase>install</phase>
                     </execution>
