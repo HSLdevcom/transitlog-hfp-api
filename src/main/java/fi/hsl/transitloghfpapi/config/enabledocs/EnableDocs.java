@@ -19,6 +19,6 @@ public class EnableDocs {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.ant("/v1/hfp/**"))
                 .build()
-                .apiInfo(new ApiInfo("HFP Api", "Api for fetching public HFP data", "1.0", null, null, null, null, Collections.emptyList()));
+                .apiInfo(new ApiInfo("HFP Public Api", "Api for operations on public HFP data", "1.0", null, null, null, null, Collections.emptyList()));
     }
 }
