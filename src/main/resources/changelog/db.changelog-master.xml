@@ -1,0 +1,425 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet id="add_event_tables" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="lightpriorityevent"/>
+            </not>
+        </preConditions>
+        <createTable tableName="lightpriorityevent">
+            <column name="id" type="double"></column>
+            <column name="topic_prefix" type="varchar(255)"></column>
+            <column name="topic_version" type="varchar(255)"></column>
+            <column name="journey_type" type="varchar(255)"></column>
+            <column name="is_ongoing" type="boolean"></column>
+            <column name="event_type" type="varchar(255)"></column>
+            <column name="mode" type="varchar(255)"></column>
+            <column name="owner_operator_id" type="smallint"></column>
+            <column name="vehicle_number" type="integer"></column>
+            <column name="uniquie_vehicle_id" type="varchar(255)"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="direction_id" type="smallint"></column>
+            <column name="headsign" type="varchar(255)"></column>
+            <column name="journey_start_time" type="time"></column>
+            <column name="next_stop_id" type="varchar(255)"></column>
+            <column name="geohash_level" type="smallint"></column>
+            <column name="topic_latitude" type="double"></column>
+            <column name="topic_longitude" type="double"></column>
+            <column name="desi" type="varchar(255)"></column>
+            <column name="dir" type="smallint"></column>
+            <column name="oper" type="smallint"></column>
+            <column name="veh" type="integer"></column>
+            <column name="tst" type="timestamp"></column>
+            <column name="tsi" type="bigint"></column>
+            <column name="spd" type="double"></column>
+            <column name="hdg" type="smallint"></column>
+            <column name="lat" type="double"></column>
+            <column name="long" type="double"></column>
+            <column name="acc" type="double"></column>
+            <column name="dl" type="integer"></column>
+            <column name="odo" type="double"></column>
+            <column name="drst" type="boolean"></column>
+            <column name="oday" type="date"></column>
+            <column name="jrn" type="integer"></column>
+            <column name="line" type="smallint"></column>
+            <column name="start" type="time"></column>
+            <column name="loc" type="varchar(255)"></column>
+            <column name="stop" type="integer"></column>
+            <column name="route" type="varchar(255)"></column>
+            <column name="occu" type="smallint"></column>
+        </createTable>
+        <createTable tableName="otherevent">
+            <column name="id" type="double"></column>
+            <column name="topic_prefix" type="varchar(255)"></column>
+            <column name="topic_version" type="varchar(255)"></column>
+            <column name="journey_type" type="varchar(255)"></column>
+            <column name="is_ongoing" type="boolean"></column>
+            <column name="event_type" type="varchar(255)"></column>
+            <column name="mode" type="varchar(255)"></column>
+            <column name="owner_operator_id" type="smallint"></column>
+            <column name="vehicle_number" type="integer"></column>
+            <column name="uniquie_vehicle_id" type="varchar(255)"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="direction_id" type="smallint"></column>
+            <column name="headsign" type="varchar(255)"></column>
+            <column name="journey_start_time" type="time"></column>
+            <column name="next_stop_id" type="varchar(255)"></column>
+            <column name="geohash_level" type="smallint"></column>
+            <column name="topic_latitude" type="double"></column>
+            <column name="topic_longitude" type="double"></column>
+            <column name="desi" type="varchar(255)"></column>
+            <column name="dir" type="smallint"></column>
+            <column name="oper" type="smallint"></column>
+            <column name="veh" type="integer"></column>
+            <column name="tst" type="timestamp"></column>
+            <column name="tsi" type="bigint"></column>
+            <column name="spd" type="double"></column>
+            <column name="hdg" type="smallint"></column>
+            <column name="lat" type="double"></column>
+            <column name="long" type="double"></column>
+            <column name="acc" type="double"></column>
+            <column name="dl" type="integer"></column>
+            <column name="odo" type="double"></column>
+            <column name="drst" type="boolean"></column>
+            <column name="oday" type="date"></column>
+            <column name="jrn" type="integer"></column>
+            <column name="line" type="smallint"></column>
+            <column name="start" type="time"></column>
+            <column name="loc" type="varchar(255)"></column>
+            <column name="stop" type="integer"></column>
+            <column name="route" type="varchar(255)"></column>
+            <column name="occu" type="smallint"></column>
+        </createTable>
+        <createTable tableName="stopevent">
+            <column name="id" type="double"></column>
+            <column name="topic_prefix" type="varchar(255)"></column>
+            <column name="topic_version" type="varchar(255)"></column>
+            <column name="journey_type" type="varchar(255)"></column>
+            <column name="is_ongoing" type="boolean"></column>
+            <column name="event_type" type="varchar(255)"></column>
+            <column name="mode" type="varchar(255)"></column>
+            <column name="owner_operator_id" type="smallint"></column>
+            <column name="vehicle_number" type="integer"></column>
+            <column name="uniquie_vehicle_id" type="varchar(255)"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="direction_id" type="smallint"></column>
+            <column name="headsign" type="varchar(255)"></column>
+            <column name="journey_start_time" type="time"></column>
+            <column name="next_stop_id" type="varchar(255)"></column>
+            <column name="geohash_level" type="smallint"></column>
+            <column name="topic_latitude" type="double"></column>
+            <column name="topic_longitude" type="double"></column>
+            <column name="desi" type="varchar(255)"></column>
+            <column name="dir" type="smallint"></column>
+            <column name="oper" type="smallint"></column>
+            <column name="veh" type="integer"></column>
+            <column name="tst" type="timestamp"></column>
+            <column name="tsi" type="bigint"></column>
+            <column name="spd" type="double"></column>
+            <column name="hdg" type="smallint"></column>
+            <column name="lat" type="double"></column>
+            <column name="long" type="double"></column>
+            <column name="acc" type="double"></column>
+            <column name="dl" type="integer"></column>
+            <column name="odo" type="double"></column>
+            <column name="drst" type="boolean"></column>
+            <column name="oday" type="date"></column>
+            <column name="jrn" type="integer"></column>
+            <column name="line" type="smallint"></column>
+            <column name="start" type="time"></column>
+            <column name="loc" type="varchar(255)"></column>
+            <column name="stop" type="integer"></column>
+            <column name="route" type="varchar(255)"></column>
+            <column name="occu" type="smallint"></column>
+        </createTable>
+        <createTable tableName="unsignedevent">
+            <column name="id" type="double"></column>
+            <column name="topic_prefix" type="varchar(255)"></column>
+            <column name="topic_version" type="varchar(255)"></column>
+            <column name="journey_type" type="varchar(255)"></column>
+            <column name="is_ongoing" type="boolean"></column>
+            <column name="event_type" type="varchar(255)"></column>
+            <column name="mode" type="varchar(255)"></column>
+            <column name="owner_operator_id" type="smallint"></column>
+            <column name="vehicle_number" type="integer"></column>
+            <column name="uniquie_vehicle_id" type="varchar(255)"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="direction_id" type="smallint"></column>
+            <column name="headsign" type="varchar(255)"></column>
+            <column name="journey_start_time" type="time"></column>
+            <column name="next_stop_id" type="varchar(255)"></column>
+            <column name="geohash_level" type="smallint"></column>
+            <column name="topic_latitude" type="double"></column>
+            <column name="topic_longitude" type="double"></column>
+            <column name="desi" type="varchar(255)"></column>
+            <column name="dir" type="smallint"></column>
+            <column name="oper" type="smallint"></column>
+            <column name="veh" type="integer"></column>
+            <column name="tst" type="timestamp"></column>
+            <column name="tsi" type="bigint"></column>
+            <column name="spd" type="double"></column>
+            <column name="hdg" type="smallint"></column>
+            <column name="lat" type="double"></column>
+            <column name="long" type="double"></column>
+            <column name="acc" type="double"></column>
+            <column name="dl" type="integer"></column>
+            <column name="odo" type="double"></column>
+            <column name="drst" type="boolean"></column>
+            <column name="oday" type="date"></column>
+            <column name="jrn" type="integer"></column>
+            <column name="line" type="smallint"></column>
+            <column name="start" type="time"></column>
+            <column name="loc" type="varchar(255)"></column>
+            <column name="stop" type="integer"></column>
+            <column name="route" type="varchar(255)"></column>
+            <column name="occu" type="smallint"></column>
+        </createTable>
+        <createTable tableName="vehicleposition">
+            <column name="id" type="double"></column>
+            <column name="topic_prefix" type="varchar(255)"></column>
+            <column name="topic_version" type="varchar(255)"></column>
+            <column name="journey_type" type="varchar(255)"></column>
+            <column name="is_ongoing" type="boolean"></column>
+            <column name="event_type" type="varchar(255)"></column>
+            <column name="mode" type="varchar(255)"></column>
+            <column name="owner_operator_id" type="smallint"></column>
+            <column name="vehicle_number" type="integer"></column>
+            <column name="uniquie_vehicle_id" type="varchar(255)"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="direction_id" type="smallint"></column>
+            <column name="headsign" type="varchar(255)"></column>
+            <column name="journey_start_time" type="time"></column>
+            <column name="next_stop_id" type="varchar(255)"></column>
+            <column name="geohash_level" type="smallint"></column>
+            <column name="topic_latitude" type="double"></column>
+            <column name="topic_longitude" type="double"></column>
+            <column name="desi" type="varchar(255)"></column>
+            <column name="dir" type="smallint"></column>
+            <column name="oper" type="smallint"></column>
+            <column name="veh" type="integer"></column>
+            <column name="tst" type="timestamp"></column>
+            <column name="tsi" type="bigint"></column>
+            <column name="spd" type="double"></column>
+            <column name="hdg" type="smallint"></column>
+            <column name="lat" type="double"></column>
+            <column name="long" type="double"></column>
+            <column name="acc" type="double"></column>
+            <column name="dl" type="integer"></column>
+            <column name="odo" type="double"></column>
+            <column name="drst" type="boolean"></column>
+            <column name="oday" type="date"></column>
+            <column name="jrn" type="integer"></column>
+            <column name="line" type="smallint"></column>
+            <column name="start" type="time"></column>
+            <column name="loc" type="varchar(255)"></column>
+            <column name="stop" type="integer"></column>
+            <column name="route" type="varchar(255)"></column>
+            <column name="occu" type="smallint"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="renameUnique_vehicle_id_column" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="vehicleposition" columnName="uniquie_vehicle_id"/>
+        </preConditions>
+        <renameColumn tableName="vehicleposition" oldColumnName="uniquie_vehicle_id"
+                      newColumnName="unique_vehicle_id"></renameColumn>
+        <renameColumn tableName="unsignedevent" oldColumnName="uniquie_vehicle_id"
+                      newColumnName="unique_vehicle_id"></renameColumn>
+        <renameColumn tableName="stopevent" oldColumnName="uniquie_vehicle_id"
+                      newColumnName="unique_vehicle_id"></renameColumn>
+        <renameColumn tableName="otherevent" oldColumnName="uniquie_vehicle_id"
+                      newColumnName="unique_vehicle_id"></renameColumn>
+        <renameColumn tableName="lightpriorityevent" oldColumnName="uniquie_vehicle_id"
+                      newColumnName="unique_vehicle_id"></renameColumn>
+    </changeSet>
+    <changeSet id="addreveived_at_column" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="vehicleposition" columnName="received_at"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="vehicleposition">
+            <column type="timestamp" name="received_at"></column>
+        </addColumn>
+        <addColumn tableName="unsignedevent">
+            <column type="timestamp" name="received_at"></column>
+        </addColumn>
+        <addColumn tableName="stopevent">
+            <column type="timestamp" name="received_at"></column>
+        </addColumn>
+        <addColumn tableName="otherevent">
+            <column type="timestamp" name="received_at"></column>
+        </addColumn>
+        <addColumn tableName="lightpriorityevent">
+            <column type="timestamp" name="received_at"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="alter_enum_column_types" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="journey_type">SELECT DATA_TYPE FROM information_schema.columns
+                where TABLE_NAME = 'vehicleposition' AND column_name = 'journey_type'
+            </sqlCheck>
+        </preConditions>
+        <modifyDataType tableName="vehicleposition" columnName="journey_type"
+                        newDataType="journey_type"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="event_type" newDataType="event_type"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="mode" newDataType="transport_mode"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="loc"
+                        newDataType="location_quality_method"></modifyDataType>
+
+        <modifyDataType tableName="unsignedevent" columnName="journey_type" newDataType="journey_type"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="event_type" newDataType="event_type"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="mode" newDataType="transport_mode"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="loc"
+                        newDataType="location_quality_method"></modifyDataType>
+
+        <modifyDataType tableName="stopevent" columnName="journey_type" newDataType="journey_type"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="event_type" newDataType="event_type"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="mode" newDataType="transport_mode"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="loc" newDataType="location_quality_method"></modifyDataType>
+
+        <modifyDataType tableName="otherevent" columnName="journey_type" newDataType="journey_type"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="event_type" newDataType="event_type"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="mode" newDataType="transport_mode"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="loc" newDataType="location_quality_method"></modifyDataType>
+
+        <modifyDataType tableName="lightpriorityevent" columnName="journey_type"
+                        newDataType="journey_type"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="event_type"
+                        newDataType="event_type"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="mode" newDataType="transport_mode"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="loc"
+                        newDataType="location_quality_method"></modifyDataType>
+    </changeSet>
+
+    <changeSet id="modify_enum_data_type" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="journey_type">SELECT DATA_TYPE FROM information_schema.columns
+                where TABLE_NAME = 'vehicleposition' AND column_name = 'journey_type'
+            </sqlCheck>
+        </preConditions>
+        <modifyDataType tableName="vehicleposition" columnName="journey_type"
+                        newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="event_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="mode" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="vehicleposition" columnName="loc"
+                        newDataType="varchar(255)"></modifyDataType>
+
+        <modifyDataType tableName="unsignedevent" columnName="journey_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="event_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="mode" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="unsignedevent" columnName="loc"
+                        newDataType="varchar(255)"></modifyDataType>
+
+        <modifyDataType tableName="stopevent" columnName="journey_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="event_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="mode" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="stopevent" columnName="loc" newDataType="varchar(255)"></modifyDataType>
+
+        <modifyDataType tableName="otherevent" columnName="journey_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="event_type" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="mode" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="otherevent" columnName="loc" newDataType="varchar(255)"></modifyDataType>
+
+        <modifyDataType tableName="lightpriorityevent" columnName="journey_type"
+                        newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="event_type"
+                        newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="mode" newDataType="varchar(255)"></modifyDataType>
+        <modifyDataType tableName="lightpriorityevent" columnName="loc"
+                        newDataType="varchar(255)"></modifyDataType>
+    </changeSet>
+
+    <changeSet id="add_tlr_fields" author="Joose Helle">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="lightpriorityevent" columnName="tlp_requestid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="lightpriorityevent">
+            <column name="tlp_requestid" type="integer"/>
+            <column name="tlp_requesttype" type="varchar(255)"/>
+            <column name="tlp_prioritylevel" type="varchar(255)"/>
+            <column name="tlp_reason" type="varchar(255)"/>
+            <column name="tlp_att_seq" type="integer"/>
+            <column name="tlp_decision" type="varchar(255)"/>
+            <column name="sid" type="integer"/>
+            <column name="signal_groupid" type="integer"/>
+            <column name="tlp_signalgroupnbr" type="integer"/>
+            <column name="tlp_line_configid" type="integer"/>
+            <column name="tlp_point_configid" type="integer"/>
+            <column name="tlp_frequency" type="integer"/>
+            <column name="tlp_protocol" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_seq_and_dr_type_fields" author="Joose Helle">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="lightpriorityevent" columnName="seq"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="lightpriorityevent">
+            <column name="seq" type="smallint"/>
+            <column name="dr_type" type="smallint"/>
+        </addColumn>
+        <addColumn tableName="otherevent">
+            <column name="seq" type="smallint"/>
+            <column name="dr_type" type="smallint"/>
+        </addColumn>
+        <addColumn tableName="stopevent">
+            <column name="seq" type="smallint"/>
+            <column name="dr_type" type="smallint"/>
+        </addColumn>
+        <addColumn tableName="unsignedevent">
+            <column name="seq" type="smallint"/>
+            <column name="dr_type" type="smallint"/>
+        </addColumn>
+        <addColumn tableName="vehicleposition">
+            <column name="seq" type="smallint"/>
+            <column name="dr_type" type="smallint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="add_version_column" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="vehicleposition" columnName="version"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="vehicleposition">
+            <column name="version" type="bigint"></column>
+        </addColumn>
+        <addColumn tableName="unsignedevent">
+            <column name="version" type="bigint"></column>
+        </addColumn>
+        <addColumn tableName="stopevent">
+            <column name="version" type="bigint"></column>
+        </addColumn>
+        <addColumn tableName="otherevent">
+            <column name="version" type="bigint"></column>
+        </addColumn>
+        <addColumn tableName="lightpriorityevent">
+            <column name="version" type="bigint"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="alter_timestamp_column_to_timestampz" author="Aki Väliaho">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="timestamp without time zone">SELECT DATA_TYPE FROM information_schema.columns
+                where TABLE_NAME = 'vehicleposition' AND column_name = 'tst'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile dbms="postgresql"
+                 encoding="UTF-8"
+                 endDelimiter="\n"
+                 path="modifytimestampwithtimezone.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <include file="db.add_cancellation_tables.xml" relativeToChangelogFile="true"></include>
+    <include file="db.add_alert_table.xml" relativeToChangelogFile="true"></include>
+
+</databaseChangeLog>

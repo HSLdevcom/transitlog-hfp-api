@@ -1,0 +1,49 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="add_alert_table_to_changelog" author="Joose Helle">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="alert"/>
+            </not>
+        </preConditions>
+        <sql>CREATE SEQUENCE public.alert_id_seq
+            INCREMENT BY 1
+            MINVALUE 1
+            MAXVALUE 9223372036854775807
+            START 1
+            CACHE 1
+            NO CYCLE;
+        </sql>
+        <createTable tableName="alert">
+            <column name="id" type="bigserial" defaultValue="nextval('alert_id_seq'::regclass)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()"></column>
+            <column name="modified_at" type="timestamptz" defaultValueComputed="now()"></column>
+            <column name="route_id" type="varchar(255)"></column>
+            <column name="stop_id" type="varchar(255)"></column>
+            <column name="affects_all_routes" type="boolean"></column>
+            <column name="affects_all_stops" type="boolean"></column>
+            <column name="valid_from" type="timestamptz"></column>
+            <column name="valid_to" type="timestamptz"></column>
+            <column name="last_modified" type="timestamptz"></column>
+            <column name="json_schema_version" type="smallint" defaultValue="1"></column>
+            <column name="data" type="jsonb"></column>
+            <column name="ext_id_bulletin" type="varchar(255)"></column>
+        </createTable>
+        <sql>ALTER TABLE alert
+            ADD CONSTRAINT unique_alert_route_constraint UNIQUE (route_id, valid_from, valid_to, last_modified);
+            ALTER TABLE alert
+            ADD CONSTRAINT unique_alert_stop_constraint UNIQUE (stop_id, valid_from, valid_to, last_modified);
+        </sql>
+        <sql>CREATE INDEX alert_route_idx ON alert (valid_from, valid_to, route_id);
+            CREATE INDEX alert_stop_idx ON alert (valid_from, valid_to, stop_id);
+            CREATE INDEX alert_all_routes_idx ON alert (valid_from, valid_to, affects_all_routes);
+            CREATE INDEX alert_all_stops_idx ON alert (valid_from, valid_to, affects_all_stops);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

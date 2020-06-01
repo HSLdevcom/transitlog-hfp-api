@@ -5,5 +5,5 @@ import fi.hsl.transitloghfpapi.domain.*;
 import java.util.*;
 
 public interface CsvMapper {
-    List<Event> mapToCsv(String filePath);
+    List<Event> mapCsvToEvent(String filePath);
 }

@@ -1,6 +1,8 @@
 package fi.hsl.transitloghfpapi.servehfp;
 
 import io.swagger.annotations.*;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.repository.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,9 @@ public class HfpController {
     @PostMapping("/collectHfp")
     @ApiResponse(message = "Returns a token representing a batch job id for HFP collection", code = 202)
     @ApiOperation(value = "Returns a token representing a batch job id for HFP collection")
-    public ResponseEntity<String> registerJob(@ApiParam(value = "Start date in a format YYYY-mm-dd (optional: HH)", required = true, name = "startDate")
-                                              @RequestParam(value = "startDate", required = true) Date startDate, @ApiParam(value = "End date in a format YYYY-mm-dd (optional: HH)", required = true, name = "endDate")
-                                              @RequestParam(value = "endDate", required = true) Date endDate) {
+    public ResponseEntity<Long> registerJob(@ApiParam(value = "Start date in a format YYYY-mm-dd (optional: HH)", required = true, name = "startDate")
+                                            @RequestParam(value = "startDate", required = true) Date startDate, @ApiParam(value = "End date in a format YYYY-mm-dd (optional: HH)", required = true, name = "endDate")
+                                            @RequestParam(value = "endDate", required = true) Date endDate) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         return hfpBatchService.createHFPCollectionJob(startDate, endDate);
     }
 }
