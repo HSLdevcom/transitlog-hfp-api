@@ -1,111 +1,103 @@
 package fi.hsl.transitloghfpapi.servehfp.azure;
 
 import com.azure.storage.blob.*;
-import com.azure.storage.blob.models.*;
 import fi.hsl.transitloghfpapi.domain.*;
-import org.springframework.stereotype.*;
-import reactor.core.publisher.*;
+import lombok.extern.slf4j.*;
 
+import java.io.*;
 import java.time.*;
-import java.time.format.*;
-import java.time.temporal.*;
 import java.util.*;
 import java.util.stream.*;
 
+@Slf4j
 public class AzureBlobStorageDownload {
 
-    private final BlobContainerAsyncClient blobContainerClient;
+    private final BlobContainerClient blobContainerClient;
 
     public AzureBlobStorageDownload(String blobConnectionString, String containerName) {
-        BlobServiceAsyncClient blobServiceClient = new BlobServiceClientBuilder().connectionString(blobConnectionString).buildAsyncClient();
-        blobContainerClient = blobServiceClient.getBlobContainerAsyncClient(containerName);
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(blobConnectionString).buildClient();
+        blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
     }
 
-    public List<Event> downloadblob(LocalDateTime start, LocalDateTime end) {
+    public List<AzureEventConsumer> downloadblobs(LocalDateTime start, LocalDateTime end) {
+        final List<AzureFileProperties> azureFileProperties = AzureFileProperties.getHfpFiles(start, end);
         return
-                downloadblob(new BlobStorageFilenameStrategy().createAllEventsFileNames(start, end));
+                downloadblobs(azureFileProperties);
     }
 
-    private List<Event> downloadblob(List<String> listOfHfpFilenames) {
-        return listOfHfpFilenames.stream()
-                .map(this::downloadblob)
-                .flatMap(localBlob -> localBlob.createEntryList().stream())
+    private List<AzureEventConsumer> downloadblobs(List<AzureFileProperties> azureFileProperties) {
+        return azureFileProperties.stream()
+                .map(this::downloadBlob).filter(Objects::nonNull)
+                .map(nonNullblob -> {
+                    try {
+                        return nonNullblob.getByteConsumer();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
                 .collect(Collectors.toList());
     }
 
+    private LocalBlob downloadBlob(AzureFileProperties azureFileProperties) {
+        try {
+            return downloadblobs(azureFileProperties);
+        } catch (IOException e) {
+            log.debug("Failed to download filename: {}", azureFileProperties.getFilePath());
+            return null;
+        }
+    }
 
-    private LocalBlob downloadblob(String fileName) {
-        final BlobAsyncClient blobClient = blobContainerClient.getBlobAsyncClient(fileName);
-        final Mono<BlobProperties> blobPropertiesMono = blobClient.downloadToFile(fileName);
-        return new LocalBlob(blobPropertiesMono, fileName);
+
+    private LocalBlob downloadblobs(AzureFileProperties fileProperties) throws IOException {
+        final BlobClient blobClient;
+        try {
+            blobClient = blobContainerClient.getBlobClient(fileProperties.getFilePath());
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+        try {
+            return new LocalBlob(blobClient, fileProperties);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     public static class LocalBlob {
-        private final String filePath;
-        private final Mono<BlobProperties> blobPropertiesMono;
+        private final AzureFileProperties fileProperties;
+        private final BlobClient blockBlobClient;
 
-        LocalBlob(Mono<BlobProperties> blobPropertiesMono, String fileName) {
-            this.blobPropertiesMono = blobPropertiesMono;
-            this.filePath = fileName;
-        }
-
-        List<Event> createEntryList() {
-            final BlobProperties block = this.blobPropertiesMono.block();
-
-            //Read the csv file from filesystem into events
-            return new BlobStorageCSVFormatMapper().mapCsvToEvent(filePath);
-
-        }
-    }
-
-    static class BlobStorageCSVFormatMapper implements CsvMapper {
-        @Override
-        public List<Event> mapCsvToEvent(String filePath) {
-            throw new RuntimeException("Not implemented yet exception");
-        }
-    }
-
-    @Component
-    static
-    class BlobStorageFilenameStrategy {
-        List<String> createAllEventsFileNames(LocalDateTime startDate, LocalDateTime endDate) {//Split to hourly ranges
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
-            List<LocalDateTime> localDates = new ArrayList<>();
-
-            while (startDate.isBefore(endDate)) {
-                localDates.add(startDate);
-                startDate = startDate.plus(1, ChronoUnit.HOURS);
-            }
-            return localDates.stream()
-                    .flatMap(localDateTime -> createHfpFileName(localDateTime, dateTimeFormatter).stream())
-                    .collect(Collectors.toList());
-        }
-
-        private List<String> createHfpFileName(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {
-            List<String> hfpFileNames = new ArrayList<>();
-            final String properDateFormat = localDateTime.format(dateTimeFormatter);
-
-            hfpFileNames.add(HFPFilenamePrefix.LIGHTPRIORITYEVENT.filename + properDateFormat + ".csv");
-            hfpFileNames.add(HFPFilenamePrefix.OTHEREVENT + properDateFormat + ".csv");
-            hfpFileNames.add(HFPFilenamePrefix.STOPEVENT + properDateFormat + ".csv");
-            hfpFileNames.add(HFPFilenamePrefix.VEHICLEPOSITION + properDateFormat + ".csv");
-
-            return hfpFileNames;
-        }
-
-
-        private enum HFPFilenamePrefix {
-            LIGHTPRIORITYEVENT("/csv/LightPriorityEvent/"),
-            OTHEREVENT("/csv/OtherEvent/"),
-            STOPEVENT("/csv/StopEvent"),
-            VEHICLEPOSITION("/csv/VehiclePosition");
-
-            private final String filename;
-
-            HFPFilenamePrefix(String filename) {
-                this.filename = filename;
+        LocalBlob(BlobClient blockClient, AzureFileProperties fileProperties) {
+            if (blockClient.exists()) {
+                this.blockBlobClient = blockClient;
+                this.fileProperties = fileProperties;
+            } else {
+                throw new IllegalArgumentException("Block doesnt exist");
             }
         }
+
+        AzureEventConsumer getByteConsumer() throws IOException {
+            Class<? extends Event> hfpClass = null;
+            if (fileProperties.getEventType().equals(AzureFileProperties.BlobStorageFilenameStrategy.HFPFilenamePrefix.VEHICLEPOSITION)) {
+                hfpClass = VehiclePosition.class;
+            }
+            if (fileProperties.getEventType().equals(AzureFileProperties.BlobStorageFilenameStrategy.HFPFilenamePrefix.OTHEREVENT)) {
+                hfpClass = OtherEvent.class;
+            }
+
+            if (fileProperties.getEventType().equals(AzureFileProperties.BlobStorageFilenameStrategy.HFPFilenamePrefix.LIGHTPRIORITYEVENT)) {
+                hfpClass = LightPriorityEvent.class;
+
+            }
+
+            if (fileProperties.getEventType().equals(AzureFileProperties.BlobStorageFilenameStrategy.HFPFilenamePrefix.STOPEVENT)) {
+                hfpClass = StopEvent.class;
+            }
+            final AzureEventConsumer azureEventConsumer = new AzureEventConsumer(hfpClass);
+            blockBlobClient.download(azureEventConsumer);
+            return azureEventConsumer;
+        }
+
     }
 }
 

@@ -26,6 +26,9 @@ public class HfpController {
     public ResponseEntity<Long> registerJob(@ApiParam(value = "Start date in a format YYYY-mm-dd", required = true, name = "startDate")
                                             @RequestParam(value = "startDate", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate, @ApiParam(value = "End date in a format yyyy-MM-dd", required = true, name = "endDate")
                                             @RequestParam(value = "endDate", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+        if (endDate.isBefore(startDate)) {
+            throw new HfpFetchException("Enddate cannot be before start date");
+        }
         return hfpBatchService.createHFPCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
     }
 

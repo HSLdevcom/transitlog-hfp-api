@@ -65,7 +65,7 @@ class HfpBatchService {
     private Step insertRangeIntoDatabase(LocalDateTime start, LocalDateTime end) {
         return stepBuilderFactory.get("insertRangeIntoDatabaseStep")
                 .transactionManager(platformTransactionmanager)
-                .<List<Event>, List<Event>>chunk(1000)
+                .<Event, Event>chunk(1000)
                 .reader(azureReader(start, end))
                 .processor(new HfpItemBatchOperations.PassThroughProcessor())
                 .writer(temporaryDatabaseWriter())
@@ -75,23 +75,23 @@ class HfpBatchService {
 
     }
 
-    private ItemWriter<? super List<Event>> temporaryDatabaseWriter() {
+    private ItemWriter<Event> temporaryDatabaseWriter() {
         return new HfpItemBatchOperations.AzureItemWriter(hfpRepository);
     }
 
-    private ItemReader<List<Event>> azureReader(LocalDateTime start, LocalDateTime end) {
+    private ItemReader<Event> azureReader(LocalDateTime start, LocalDateTime end) {
         return new HfpItemBatchOperations.AzureItemReader(start, end, azureBlobStorageDownload);
     }
 
     public ResponseEntity<String> getDownloadLinkIfReady(Long jobExecutionId) {
         final JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
         if (jobExecution == null) {
-            throw new HfpJobNotFinishedException("Hfp job doesn't exist, please create hfp job");
+            throw new HfpFetchException("Hfp job doesn't exist, please create hfp job");
         }
         if (jobExecution.getStatus().equals(BatchStatus.COMPLETED)) {
             return new ResponseEntity<>(blobRepository.findByJobExecutionId(jobExecutionId).getDownloadLink(), HttpStatus.OK);
         }
 
-        throw new HfpJobNotFinishedException("Hfp job not yet finished, please return later");
+        throw new HfpFetchException("Hfp job not yet finished, please return later");
     }
 }

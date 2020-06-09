@@ -10,15 +10,16 @@ import java.util.*;
 
 class HfpItemBatchOperations {
 
-    public static class PassThroughProcessor implements ItemProcessor<List<Event>, List<Event>> {
+    public static class PassThroughProcessor implements ItemProcessor<Event, Event> {
+
 
         @Override
-        public List<Event> process(List<Event> events) {
-            return events;
+        public Event process(Event event) throws Exception {
+            return event;
         }
     }
 
-    public static class AzureItemWriter implements ItemWriter<List<Event>> {
+    public static class AzureItemWriter implements ItemWriter<Event> {
 
         private final EventRepository temporaryRepository;
 
@@ -29,27 +30,30 @@ class HfpItemBatchOperations {
 
 
         @Override
-        public void write(List<? extends List<Event>> list) throws Exception {
-            list
-                    .forEach(temporaryRepository::saveAll);
-
+        public void write(List<? extends Event> list) throws Exception {
+            this.temporaryRepository.saveAll(list);
         }
     }
 
-    public static class AzureItemReader implements ItemReader<List<Event>> {
+    public static class AzureItemReader implements ItemReader<Event> {
         private final LocalDateTime start;
         private final LocalDateTime end;
         private final AzureBlobStorageDownload azureBlobStorageDownload;
+        private final List<AzureEventConsumer> bytebuffers;
 
         AzureItemReader(LocalDateTime start, LocalDateTime end, AzureBlobStorageDownload azureBlobStorageDownload) {
             this.start = start;
             this.end = end;
             this.azureBlobStorageDownload = azureBlobStorageDownload;
+            bytebuffers = azureBlobStorageDownload.downloadblobs(start, end);
         }
 
         @Override
-        public List<Event> read() {
-            return azureBlobStorageDownload.downloadblob(start, end);
+        public Event read() {
+            return bytebuffers.stream()
+                    .findFirst().orElseThrow(() -> new RuntimeException("No bytebuffer present"))
+                    .readEvent();
+
         }
 
     }

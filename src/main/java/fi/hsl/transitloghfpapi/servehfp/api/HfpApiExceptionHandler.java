@@ -7,7 +7,7 @@ import org.springframework.web.servlet.mvc.method.annotation.*;
 
 @ControllerAdvice
 public class HfpApiExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(value = {HfpJobNotFinishedException.class})
+    @ExceptionHandler(value = {HfpFetchException.class})
     protected ResponseEntity<String> handleHfpNotReadyYetException(RuntimeException ex, WebRequest request) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
