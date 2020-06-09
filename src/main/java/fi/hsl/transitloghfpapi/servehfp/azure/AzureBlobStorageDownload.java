@@ -6,7 +6,9 @@ import fi.hsl.transitloghfpapi.domain.*;
 import org.springframework.stereotype.*;
 import reactor.core.publisher.*;
 
-import java.sql.Date;
+import java.time.*;
+import java.time.format.*;
+import java.time.temporal.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -19,9 +21,9 @@ public class AzureBlobStorageDownload {
         blobContainerClient = blobServiceClient.getBlobContainerAsyncClient(containerName);
     }
 
-    public List<Event> downloadblob(Date start, Date end) {
+    public List<Event> downloadblob(LocalDateTime start, LocalDateTime end) {
         return
-                downloadblob(new BlobStorageFilenameStrategy().createHfpFilenames(start, end));
+                downloadblob(new BlobStorageFilenameStrategy().createAllEventsFileNames(start, end));
     }
 
     private List<Event> downloadblob(List<String> listOfHfpFilenames) {
@@ -54,10 +56,6 @@ public class AzureBlobStorageDownload {
             return new BlobStorageCSVFormatMapper().mapCsvToEvent(filePath);
 
         }
-
-        public void deleteLocalBlob() {
-            throw new RuntimeException("Not implemented yet exception");
-        }
     }
 
     static class BlobStorageCSVFormatMapper implements CsvMapper {
@@ -70,8 +68,44 @@ public class AzureBlobStorageDownload {
     @Component
     static
     class BlobStorageFilenameStrategy {
-        List<String> createHfpFilenames(Date startDate, Date endDate) {
-            throw new RuntimeException("Not yet implemented");
+        List<String> createAllEventsFileNames(LocalDateTime startDate, LocalDateTime endDate) {//Split to hourly ranges
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
+            List<LocalDateTime> localDates = new ArrayList<>();
+
+            while (startDate.isBefore(endDate)) {
+                localDates.add(startDate);
+                startDate = startDate.plus(1, ChronoUnit.HOURS);
+            }
+            return localDates.stream()
+                    .flatMap(localDateTime -> createHfpFileName(localDateTime, dateTimeFormatter).stream())
+                    .collect(Collectors.toList());
+        }
+
+        private List<String> createHfpFileName(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {
+            List<String> hfpFileNames = new ArrayList<>();
+            final String properDateFormat = localDateTime.format(dateTimeFormatter);
+
+            hfpFileNames.add(HFPFilenamePrefix.LIGHTPRIORITYEVENT.filename + properDateFormat + ".csv");
+            hfpFileNames.add(HFPFilenamePrefix.OTHEREVENT + properDateFormat + ".csv");
+            hfpFileNames.add(HFPFilenamePrefix.STOPEVENT + properDateFormat + ".csv");
+            hfpFileNames.add(HFPFilenamePrefix.VEHICLEPOSITION + properDateFormat + ".csv");
+
+            return hfpFileNames;
+        }
+
+
+        private enum HFPFilenamePrefix {
+            LIGHTPRIORITYEVENT("/csv/LightPriorityEvent/"),
+            OTHEREVENT("/csv/OtherEvent/"),
+            STOPEVENT("/csv/StopEvent"),
+            VEHICLEPOSITION("/csv/VehiclePosition");
+
+            private final String filename;
+
+            HFPFilenamePrefix(String filename) {
+                this.filename = filename;
+            }
         }
     }
 }
+

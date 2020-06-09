@@ -1,19 +1,19 @@
-package fi.hsl.transitloghfpapi.servehfp;
+package fi.hsl.transitloghfpapi.servehfp.batch;
 
 import fi.hsl.transitloghfpapi.domain.*;
 import fi.hsl.transitloghfpapi.domain.repositories.*;
 import fi.hsl.transitloghfpapi.servehfp.azure.*;
 import org.springframework.batch.item.*;
 
-import java.sql.Date;
+import java.time.*;
 import java.util.*;
 
-class HfpBatchOperations {
+class HfpItemBatchOperations {
 
     public static class PassThroughProcessor implements ItemProcessor<List<Event>, List<Event>> {
 
         @Override
-        public List<Event> process(List<Event> events) throws Exception {
+        public List<Event> process(List<Event> events) {
             return events;
         }
     }
@@ -37,18 +37,18 @@ class HfpBatchOperations {
     }
 
     public static class AzureItemReader implements ItemReader<List<Event>> {
-        private final Date start;
-        private final Date end;
+        private final LocalDateTime start;
+        private final LocalDateTime end;
         private final AzureBlobStorageDownload azureBlobStorageDownload;
 
-        AzureItemReader(Date start, Date end, AzureBlobStorageDownload azureBlobStorageDownload) {
+        AzureItemReader(LocalDateTime start, LocalDateTime end, AzureBlobStorageDownload azureBlobStorageDownload) {
             this.start = start;
             this.end = end;
             this.azureBlobStorageDownload = azureBlobStorageDownload;
         }
 
         @Override
-        public List<Event> read() throws Exception {
+        public List<Event> read() {
             return azureBlobStorageDownload.downloadblob(start, end);
         }
 
