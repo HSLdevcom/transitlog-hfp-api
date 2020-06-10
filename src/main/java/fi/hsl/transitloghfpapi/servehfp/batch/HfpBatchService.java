@@ -79,7 +79,7 @@ class HfpBatchService {
 
     }
 
-    public ResponseEntity<String> getDownloadLinkIfReady(Long jobExecutionId) {
+    public ResponseEntity<String> getDownloadLinkIfReady(long jobExecutionId) {
         final JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
         if (jobExecution == null) {
             throw new HfpFetchException("Hfp job doesn't exist, please create hfp job");

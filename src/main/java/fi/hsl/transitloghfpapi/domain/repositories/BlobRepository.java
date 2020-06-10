@@ -6,5 +6,5 @@ import org.springframework.stereotype.*;
 
 @Repository
 public interface BlobRepository extends JpaRepository<Blob, Long> {
-    public Blob findByJobExecutionId(Long jobExecutionId);
+    public Blob findByJobExecutionId(long jobExecutionId);
 }

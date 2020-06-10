@@ -32,12 +32,12 @@ public class HfpController {
         return hfpBatchService.createHFPCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
     }
 
-    @PostMapping("/downloadBlob")
+    @GetMapping("/downloadBlob/{blobid}")
     @ApiResponses({
             @ApiResponse(message = "Returns a download link for the blob if it's already ready", code = 200),
             @ApiResponse(message = "Returns a 404 because download link is not ready yet or it doesn't exist", code = 404)
     })
-    public ResponseEntity<String> getDownloadLink(@RequestParam(value = "blobid", required = true) Long blobid) {
+    public ResponseEntity<String> getDownloadLink(@PathVariable(value = "blobid") long blobid) {
         return hfpBatchService.getDownloadLinkIfReady(blobid);
     }
 
