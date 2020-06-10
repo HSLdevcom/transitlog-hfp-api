@@ -22,14 +22,14 @@ import java.util.*;
         DirtiesContextTestExecutionListener.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest
-public class HfpBatchServiceTest {
+public class BatchServiceTest {
     @Autowired
     private JobLauncher jobLauncher;
 
     @Autowired
     private JobRepository jobRepository;
     @Autowired
-    private HfpBatchService hfpBatchService;
+    private BatchService batchService;
 
     private JobParameters defaultJobParameters() {
         JobParametersBuilder paramsBuilder = new JobParametersBuilder();
@@ -41,7 +41,7 @@ public class HfpBatchServiceTest {
     public void testHfpDownloadJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         final LocalDateTime twodaysago = LocalDateTime.now().minusDays(2);
         final LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
-        final JobExecution hfpCollectionJob = hfpBatchService.createHfpJob(twodaysago, yesterday);
+        final JobExecution hfpCollectionJob = batchService.createHfpJob(twodaysago, yesterday);
     }
 
 }

@@ -18,7 +18,7 @@ import java.time.temporal.*;
 public class HfpController {
 
     @Autowired
-    private HfpBatchService hfpBatchService;
+    private BatchService batchService;
 
     @PostMapping("/collectHfp")
     @ApiResponse(message = "Returns a token representing a batch job id for HFP collection", code = 202)
@@ -29,7 +29,7 @@ public class HfpController {
         if (endDate.isBefore(startDate)) {
             throw new HfpFetchException("Enddate cannot be before start date");
         }
-        return hfpBatchService.startHfpCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
+        return batchService.startHfpCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
     }
 
     @GetMapping("/downloadBlob/{blobid}")
@@ -38,7 +38,7 @@ public class HfpController {
             @ApiResponse(message = "Returns a 404 because download link is not ready yet or it doesn't exist", code = 404)
     })
     public ResponseEntity<String> getDownloadLink(@PathVariable(value = "blobid") long blobid) {
-        return hfpBatchService.getDownloadLinkIfReady(blobid);
+        return batchService.getDownloadLinkIfReady(blobid);
     }
 
 }

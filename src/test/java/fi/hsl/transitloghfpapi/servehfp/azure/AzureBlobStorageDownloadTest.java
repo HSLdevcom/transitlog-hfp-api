@@ -12,7 +12,7 @@ class AzureBlobStorageDownloadTest {
 
     @Test
     void filenameStrategy() {
-        final AzureFileProperties.BlobStorageFilenameStrategy blobStorageFilenameStrategy = new AzureFileProperties.BlobStorageFilenameStrategy();
+        final HFPBlobStorageDownloader.AzureFileProperty.BlobStorageFilenameStrategy blobStorageFilenameStrategy = new HFPBlobStorageDownloader.AzureFileProperty.BlobStorageFilenameStrategy();
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime after = LocalDateTime.now();
         final LocalDateTime plus = after.plus(5, ChronoUnit.YEARS);
