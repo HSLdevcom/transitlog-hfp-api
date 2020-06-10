@@ -18,7 +18,7 @@ class AzureFileProperties {
         this.filePath = filePath;
     }
 
-    static List<AzureFileProperties> getHfpFiles(LocalDateTime start, LocalDateTime end) {
+    static List<AzureFileProperties> getHfpFileProperties(LocalDateTime start, LocalDateTime end) {
         final List<String> allEventsFileNames = new BlobStorageFilenameStrategy().createAllEventsFileNames(start, end);
         return allEventsFileNames
                 .stream()

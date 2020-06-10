@@ -22,7 +22,7 @@ import java.util.*;
         DirtiesContextTestExecutionListener.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest
-public class HfpBatchServiceTest {
+public class BatchServiceTest {
     @Autowired
     private JobLauncher jobLauncher;
 

@@ -2,6 +2,7 @@ package fi.hsl.transitloghfpapi.servehfp.batch;
 
 import fi.hsl.transitloghfpapi.domain.*;
 import fi.hsl.transitloghfpapi.domain.repositories.*;
+import fi.hsl.transitloghfpapi.servehfp.*;
 import fi.hsl.transitloghfpapi.servehfp.azure.*;
 import lombok.extern.slf4j.*;
 import org.springframework.batch.item.*;
@@ -11,7 +12,7 @@ import java.util.*;
 
 class HfpItemBatchOperations {
 
-    public static class PassThroughProcessor implements ItemProcessor<Event, Event> {
+    public static class FilteringProcessor implements ItemProcessor<Event, Event> {
 
 
         @Override
@@ -21,11 +22,11 @@ class HfpItemBatchOperations {
     }
 
     @Slf4j
-    public static class AzureItemWriter implements ItemWriter<Event> {
+    public static class EventWriter implements ItemWriter<Event> {
 
         private final EventRepository temporaryRepository;
 
-        AzureItemWriter(EventRepository temporaryRepository) {
+        EventWriter(EventRepository temporaryRepository) {
             this.temporaryRepository = temporaryRepository;
 
         }
@@ -37,18 +38,16 @@ class HfpItemBatchOperations {
         }
     }
 
-    public static class AzureItemReader implements ItemReader<Event> {
-        private final List<AzureEventConsumer> bytebuffers;
+    public static class BlobItemReader implements ItemReader<Event> {
+        private final HfpDownload hfpDownload;
 
-        AzureItemReader(LocalDateTime start, LocalDateTime end, AzureBlobStorageDownload azureBlobStorageDownload) {
-            bytebuffers = azureBlobStorageDownload.downloadblobs(start, end);
+        BlobItemReader(LocalDateTime start, LocalDateTime end, BlobStorage blobStorage, List<Class<? extends Event>> typesToFetch) {
+            this.hfpDownload = new HfpDownload(start, end, blobStorage, typesToFetch);
         }
 
         @Override
         public Event read() {
-            return bytebuffers.stream()
-                    .findFirst().orElseThrow(() -> new RuntimeException("No bytebuffer present"))
-                    .readEvent();
+            return hfpDownload.streamNextEvent();
 
         }
 

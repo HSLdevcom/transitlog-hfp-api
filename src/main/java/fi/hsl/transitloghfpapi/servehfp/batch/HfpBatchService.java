@@ -28,22 +28,23 @@ class HfpBatchService {
     private final JobBuilderFactory jobBuilderFactory;
     private final JobExplorer jobExplorer;
     private final BlobRepository blobRepository;
-    private AzureBlobStorageDownload azureBlobStorageDownload;
+    private BlobStorage blobStorage;
     private EventRepository temporaryHfpRepository;
 
     @Autowired
-    public HfpBatchService(@Value("${blobConnectionString}") String blobConnectionString, @Value("${containerName}") String containerName, EventRepository temporaryHfpRepository,
+    public HfpBatchService(EventRepository temporaryHfpRepository,
                            JobLauncher jobLauncher,
                            StepBuilderFactory stepBuilderFactory,
                            PlatformTransactionManager platformTransactionManager,
                            JobBuilderFactory jobBuilderFactory,
                            JobExplorer jobExplorer,
-                           BlobRepository blobRepository) {
+                           BlobRepository blobRepository,
+                           BlobStorage blobStorage) {
         this.blobRepository = blobRepository;
         this.jobExplorer = jobExplorer;
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobLauncher = jobLauncher;
-        this.azureBlobStorageDownload = new AzureBlobStorageDownload(blobConnectionString, containerName);
+        this.blobStorage = blobStorage;
         this.temporaryHfpRepository = temporaryHfpRepository;
         this.platformTransactionmanager = platformTransactionManager;
         this.jobBuilderFactory = jobBuilderFactory;
@@ -63,21 +64,17 @@ class HfpBatchService {
     private Job hfpCollectionJob(LocalDateTime start, LocalDateTime end) {
         final JobBuilder jobBuilder = jobBuilderFactory.get("hfp-collection-job");
         return jobBuilder.flow(insertRangeIntoDatabase(start, end))
-                .next(uploadFilteredintoBlob())
                 .end().build();
     }
 
-    private Step uploadFilteredintoBlob() {
-        return null;
-    }
 
     private Step insertRangeIntoDatabase(LocalDateTime start, LocalDateTime end) {
         return stepBuilderFactory.get("insertRangeIntoDatabaseStep")
                 .transactionManager(platformTransactionmanager)
                 .<Event, Event>chunk(10)
-                .reader(new HfpItemBatchOperations.AzureItemReader(start, end, azureBlobStorageDownload))
-                .processor(new HfpItemBatchOperations.PassThroughProcessor())
-                .writer(new HfpItemBatchOperations.AzureItemWriter(temporaryHfpRepository))
+                .reader(new HfpItemBatchOperations.BlobItemReader(start, end, blobStorage, List.of(LightPriorityEvent.class, StopEvent.class, VehiclePosition.class, OtherEvent.class)))
+                .processor(new HfpItemBatchOperations.FilteringProcessor())
+                .writer(new HfpItemBatchOperations.EventWriter(temporaryHfpRepository))
                 .faultTolerant()
                 .retryPolicy(new AlwaysRetryPolicy())
                 .build();
