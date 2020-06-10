@@ -29,10 +29,10 @@ class HfpBatchService {
     private final JobExplorer jobExplorer;
     private final BlobRepository blobRepository;
     private AzureBlobStorageDownload azureBlobStorageDownload;
-    private EventRepository hfpRepository;
+    private EventRepository temporaryHfpRepository;
 
     @Autowired
-    public HfpBatchService(@Value("${blobConnectionString}") String blobConnectionString, @Value("${containerName}") String containerName, EventRepository hfpRepository,
+    public HfpBatchService(@Value("${blobConnectionString}") String blobConnectionString, @Value("${containerName}") String containerName, EventRepository temporaryHfpRepository,
                            JobLauncher jobLauncher,
                            StepBuilderFactory stepBuilderFactory,
                            PlatformTransactionManager platformTransactionManager,
@@ -44,16 +44,21 @@ class HfpBatchService {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobLauncher = jobLauncher;
         this.azureBlobStorageDownload = new AzureBlobStorageDownload(blobConnectionString, containerName);
-        this.hfpRepository = hfpRepository;
+        this.temporaryHfpRepository = temporaryHfpRepository;
         this.platformTransactionmanager = platformTransactionManager;
         this.jobBuilderFactory = jobBuilderFactory;
     }
 
 
-    public ResponseEntity<Long> createHFPCollectionJob(LocalDateTime startDate, LocalDateTime endDate) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        final JobExecution today = jobLauncher.run(hfpCollectionJob(startDate, endDate), new JobParameters(Map.of("today", new JobParameter(Calendar.getInstance().getTime()))));
+    public ResponseEntity<Long> startHfpCollectionJob(LocalDateTime startDate, LocalDateTime endDate) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+        final JobExecution today = createHfpJob(startDate, endDate);
         return new ResponseEntity<>(today.getJobId(), HttpStatus.ACCEPTED);
     }
+
+    JobExecution createHfpJob(LocalDateTime startDate, LocalDateTime endDate) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+        return jobLauncher.run(hfpCollectionJob(startDate, endDate), new JobParameters(Map.of("today", new JobParameter(Calendar.getInstance().getTime()))));
+    }
+
 
     private Job hfpCollectionJob(LocalDateTime start, LocalDateTime end) {
         final JobBuilder jobBuilder = jobBuilderFactory.get("hfp-collection-job");
@@ -69,10 +74,10 @@ class HfpBatchService {
     private Step insertRangeIntoDatabase(LocalDateTime start, LocalDateTime end) {
         return stepBuilderFactory.get("insertRangeIntoDatabaseStep")
                 .transactionManager(platformTransactionmanager)
-                .<Event, Event>chunk(1000)
+                .<Event, Event>chunk(10)
                 .reader(new HfpItemBatchOperations.AzureItemReader(start, end, azureBlobStorageDownload))
                 .processor(new HfpItemBatchOperations.PassThroughProcessor())
-                .writer(new HfpItemBatchOperations.AzureItemWriter(hfpRepository))
+                .writer(new HfpItemBatchOperations.AzureItemWriter(temporaryHfpRepository))
                 .faultTolerant()
                 .retryPolicy(new AlwaysRetryPolicy())
                 .build();

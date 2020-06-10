@@ -30,7 +30,6 @@ class HfpItemBatchOperations {
 
         }
 
-
         @Override
         public void write(List<? extends Event> list) throws Exception {
             log.info("Saving {} entities", list.size());

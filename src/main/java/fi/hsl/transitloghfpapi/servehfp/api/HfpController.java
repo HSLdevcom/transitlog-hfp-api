@@ -29,7 +29,7 @@ public class HfpController {
         if (endDate.isBefore(startDate)) {
             throw new HfpFetchException("Enddate cannot be before start date");
         }
-        return hfpBatchService.createHFPCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
+        return hfpBatchService.startHfpCollectionJob(startDate.atStartOfDay(), endDate.plus(1, ChronoUnit.DAYS).atStartOfDay());
     }
 
     @GetMapping("/downloadBlob/{blobid}")
