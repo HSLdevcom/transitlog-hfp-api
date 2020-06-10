@@ -13,12 +13,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>transitlog-hfp-api</name>
     <description>Transitlog hfp api</description>
-
     <properties>
         <java.version>11</java.version>
         <common.version>1.3.9</common.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

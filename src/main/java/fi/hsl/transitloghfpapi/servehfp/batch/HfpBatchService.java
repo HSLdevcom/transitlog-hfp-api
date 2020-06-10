@@ -10,7 +10,6 @@ import org.springframework.batch.core.explore.*;
 import org.springframework.batch.core.job.builder.*;
 import org.springframework.batch.core.launch.*;
 import org.springframework.batch.core.repository.*;
-import org.springframework.batch.item.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.retry.policy.*;
@@ -59,28 +58,25 @@ class HfpBatchService {
     private Job hfpCollectionJob(LocalDateTime start, LocalDateTime end) {
         final JobBuilder jobBuilder = jobBuilderFactory.get("hfp-collection-job");
         return jobBuilder.flow(insertRangeIntoDatabase(start, end))
+                .next(uploadFilteredintoBlob())
                 .end().build();
+    }
+
+    private Step uploadFilteredintoBlob() {
+        return null;
     }
 
     private Step insertRangeIntoDatabase(LocalDateTime start, LocalDateTime end) {
         return stepBuilderFactory.get("insertRangeIntoDatabaseStep")
                 .transactionManager(platformTransactionmanager)
                 .<Event, Event>chunk(1000)
-                .reader(azureReader(start, end))
+                .reader(new HfpItemBatchOperations.AzureItemReader(start, end, azureBlobStorageDownload))
                 .processor(new HfpItemBatchOperations.PassThroughProcessor())
-                .writer(temporaryDatabaseWriter())
+                .writer(new HfpItemBatchOperations.AzureItemWriter(hfpRepository))
                 .faultTolerant()
                 .retryPolicy(new AlwaysRetryPolicy())
                 .build();
 
-    }
-
-    private ItemWriter<Event> temporaryDatabaseWriter() {
-        return new HfpItemBatchOperations.AzureItemWriter(hfpRepository);
-    }
-
-    private ItemReader<Event> azureReader(LocalDateTime start, LocalDateTime end) {
-        return new HfpItemBatchOperations.AzureItemReader(start, end, azureBlobStorageDownload);
     }
 
     public ResponseEntity<String> getDownloadLinkIfReady(Long jobExecutionId) {
